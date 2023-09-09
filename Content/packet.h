@@ -1,5 +1,6 @@
 #pragma once
 #include "content_constants.h"
+#include "content_config.h"
 
 struct PacketInfo
 {
@@ -37,7 +38,6 @@ struct LOGIN_RESPONSE_PACKET : public PACKET_HEADER
 
 
 //- 룸에 들어가기 요청
-//const int MAX_ROOM_TITLE_SIZE = 32;
 struct ROOM_ENTER_REQUEST_PACKET : public PACKET_HEADER
 {
 	int32_t room_number_;
@@ -77,5 +77,32 @@ struct ROOM_CHAT_NOTIFY_PACKET : public PACKET_HEADER
 	char user_id_[kMAX_USER_ID_LEN + 1] = { 0, };
 	char msg_[kMAX_CHAT_MSG_SIZE + 1] = { 0, };
 };
-#pragma pack(pop)
 
+
+//- 룸 유저 리스트
+struct USER_INFO
+{
+	uint64_t user_index_;
+	int8_t id_len_;
+	char user_id_[kMAX_USER_ID_LEN + 1] = { 0, };
+};
+
+struct ROOM_USER_LIST_NOTIFY_PACKET : public PACKET_HEADER
+{
+	int8_t user_count_;
+	USER_INFO user_list_[kROOM_MAX_USER_CNT];
+};
+
+//- 룸 새 유저 알림
+struct ROOM_NEW_USER_NOTIFY_PACKET : public PACKET_HEADER
+{
+	USER_INFO user_info_;
+};
+
+//- 룸 떠난 유저 알림
+struct ROOM_LEAVE_USER_NOTIFY_PACKET : public PACKET_HEADER
+{
+	uint64_t user_index_;
+};
+
+#pragma pack(pop)
