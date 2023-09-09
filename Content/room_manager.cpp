@@ -1,0 +1,62 @@
+#include "room_manager.h"
+
+#include "user.h"
+#include "content_config.h"
+
+RoomManager::~RoomManager()
+{
+	for (auto& room : room_list_)
+	{
+		delete room;
+	}
+}
+
+void RoomManager::Init()
+{
+	for (auto i = 0; i < kMAX_ROOM_CNT; i++)
+	{
+		room_list_.push_back(new Room());
+		room_list_[i]->Init(i);
+		room_list_[i]->SetSendPacket(SendPacketFunc);
+	}
+}
+
+void RoomManager::SetSendPacket(std::function<void(uint32_t, char*, uint16_t)> send_packet)
+{
+	SendPacketFunc = send_packet;
+}
+
+Room* RoomManager::GetRoomByIdx(const int32_t room_idx)
+{
+	if (room_idx < 0 || room_idx >= room_list_.size()) {
+		return nullptr;
+	}
+
+	return room_list_[room_idx];
+}
+
+ERROR_CODE RoomManager::EnterRoom(User* p_user, const int32_t room_idx)
+{
+	auto p_room = GetRoomByIdx(room_idx);
+
+	if (p_room == nullptr) {
+		return ERROR_CODE::kROOM_INVALID_INDEX;
+	}
+
+	return p_room->EnterUser(p_user);
+}
+
+ERROR_CODE RoomManager::LeaveRoom(User* p_user)
+{
+	auto room_idx = p_user->GetRoomIdx();
+	auto p_room = GetRoomByIdx(room_idx);
+
+	if (p_room == nullptr) {
+		return ERROR_CODE::kROOM_INVALID_INDEX;
+	}
+
+	p_room->LeaveUser(p_user);
+	p_user->SetDomainState(User::DOMAIN_STATE::kLOGIN);
+
+	return ERROR_CODE::kNONE;
+}
