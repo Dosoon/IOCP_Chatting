@@ -27,5 +27,6 @@ enum class ERROR_CODE : unsigned short
 	kLEAVE_ROOM_INVALID_ROOM_INDEX = 71,
 
 	kCHAT_ROOM_INVALID_ROOM_NUMBER = 81,
+	kUSER_IN_LOBBY = 82,
 
 };

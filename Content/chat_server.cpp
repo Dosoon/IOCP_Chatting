@@ -65,6 +65,7 @@ void ChatServer::SetDelegate()
 /// </summary>
 void ChatServer::OnConnect(int32_t session_idx)
 {
+	std::cout << "[Connected] " << session_idx << std::endl;
 	// 패킷 매니저에 시스템 패킷 전달
 	PacketInfo pkt{
 		.session_index_ = static_cast<uint16_t>(session_idx),
@@ -90,6 +91,7 @@ void ChatServer::OnRecv(int32_t session_idx, const char* p_data, DWORD len)
 /// </summary>
 void ChatServer::OnDisconnect(int32_t session_idx)
 {
+	std::cout << "[Disconnected] " << session_idx << std::endl;
 	// 패킷 매니저에 시스템 패킷 전달
 	PacketInfo pkt{
 		.session_index_ = static_cast<uint16_t>(session_idx),

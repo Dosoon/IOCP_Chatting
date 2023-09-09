@@ -44,7 +44,7 @@ bool ErrorHandler::Handle(int32_t socket_result, std::function<int(void)> get_er
 
 		std::cout << '[' << method << "] Failed With Error Code : " << error_code << '\n';
 		va_end(code_list);
-		return true;
+		return false;
 	}
 }
 

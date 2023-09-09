@@ -191,10 +191,20 @@ void PacketManager::DisconnectHandler(uint32_t session_idx, uint16_t, char*)
 		return;
 	}
 
-	if (p_user->GetDomainState() != User::DOMAIN_STATE::kNONE)
+	if (p_user->GetDomainState() == User::DOMAIN_STATE::kROOM)
 	{
-		p_ref_user_manager_->DeleteUserInfo(p_user->GetUserID());
+		auto room_idx = p_user->GetRoomIdx();
+
+		auto p_room = p_ref_room_manager_->GetRoomByIdx(room_idx);
+		if (p_room == nullptr)
+		{
+			return;
+		}
+
+		p_room->LeaveUser(p_user);
 	}
+
+	p_ref_user_manager_->DeleteUserInfo(p_user->GetUserID());
 }
 
 void PacketManager::LoginHandler(uint32_t session_idx, uint16_t, char* p_data)
@@ -237,14 +247,16 @@ void PacketManager::LoginHandler(uint32_t session_idx, uint16_t, char* p_data)
 void PacketManager::LoginDBResHandler(uint32_t session_idx, uint16_t, char* p_data)
 {
 	auto login_db_res_pkt = *reinterpret_cast<RedisLoginRes*>(p_data);
+	auto login_res_pkt = SetPacketIdAndLen<LOGIN_RESPONSE_PACKET>(PACKET_ID::kLOGIN_RESPONSE);
 
 	if (login_db_res_pkt.result_ == static_cast<int16_t>(ERROR_CODE::kNONE)) {
-		p_ref_user_manager_->SetUserID(session_idx, "");
 		p_ref_user_manager_->SetUserLogin(session_idx);
+	}
+	else {
+		p_ref_user_manager_->SetUserID(session_idx, "");
 	}
 
 	// 응답 생성 및 전송
-	auto login_res_pkt = SetPacketIdAndLen<LOGIN_RESPONSE_PACKET>(PACKET_ID::kLOGIN_RESPONSE);
 	login_res_pkt.result_ = login_db_res_pkt.result_;
 
 	SendPacketFunc(session_idx, (char*)&login_res_pkt, sizeof(login_res_pkt));
@@ -309,6 +321,8 @@ void PacketManager::RoomChatHandler(uint32_t session_idx, uint16_t, char* p_data
 	auto p_req_user = p_ref_user_manager_->GetUserByIndex(session_idx);
 
 	if (p_req_user == nullptr || p_req_user->GetDomainState() != User::DOMAIN_STATE::kROOM) {
+		chat_res_pkt.result_ = static_cast<int16_t>(ERROR_CODE::kUSER_IN_LOBBY);
+		SendPacketFunc(session_idx, (char*)&chat_res_pkt, sizeof(chat_res_pkt));
 		return;
 	}
 
