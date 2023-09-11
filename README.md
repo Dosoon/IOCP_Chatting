@@ -125,7 +125,7 @@ sequenceDiagram
 
 Client-)Server:kROOM_CHAT_REQUEST
 Note over Server: 방 입장 상태인지 검증
-alt 방 입장 상태가 아님
+alt 방 입장 상태가 아니거나<br>유효하지 않은 방 번호
 Server--)Client:kROOM_CHAT_RESPONSE(실패)
 else 방 입장 상태
 Server--)Client:[다른 클라이언트에 Broadcast]<br>kROOM_CHAT_NOTIFY
