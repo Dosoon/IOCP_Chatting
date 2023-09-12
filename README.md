@@ -25,7 +25,7 @@
 
 # :chart_with_upwards_trend: 서버 구조
 
-![](docs/001.PNG)
+![](docs/001.png)
 
 ---
 
